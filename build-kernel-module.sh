@@ -7,6 +7,7 @@ RELEASE_VER="8.6"
 
 DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 OUTPUT_DIR="${DIR}/_output"
+mkdir -p "${OUTPUT_DIR}"
 
 if [ "$(oc get secret etc-pki-entitlement -o name | wc -l)" -eq 0 ]; then
     echo "Creating etc-pki-entitlement secret"
