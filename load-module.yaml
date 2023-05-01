@@ -10,7 +10,7 @@ spec:
         moduleName: ice
         dirName: /opt 
       kernelMappings:  
-        - literal: 4.18.0-372.40.1.el8_6.x86_64
+        - regexp: '^.+$'
           containerImage: image-registry.openshift-image-registry.svc:5000/build-driver/ice:latest
   selector:
     node-role.kubernetes.io/master: ""

@@ -47,5 +47,4 @@ Load the kernel module:
 ~~~
 oc apply -f load-module.yaml
 ~~~
-> Make changes to this file as needed. The literal string for the kernel version must be updated with the actual
-kernel version (on OCP, run `uname -r`)
+> Make changes to this file as needed. For example the IS stream location.
