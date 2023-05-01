@@ -6,22 +6,20 @@ spec:
   source:
     dockerfile: |
         FROM ubi8 as builder
-        WORKDIR /usr/src
+        WORKDIR /usr/src/intel-driver
         RUN curl -L -O "{{DRIVER_URL}}"
+        RUN tar -xf *.tar.gz
+        RUN find . -name '*.spec' | xargs -I {} sed -i 's/^%define need_aux_rpm.*/%define need_aux_rpm 0/' {}
+        RUN filename=$(find . -name *.tar.gz); rm -f "${filename}"; ls -al; tar -czf "${filename}" $(find . -mindepth 1 -maxdepth 1 -type d)
+        RUN ls -al
         RUN rm -Rf /etc/rhsm-host
         RUN yum install -y --enablerepo=rhel-8-for-x86_64-baseos-eus-rpms --releasever={{RELEASE_VER}} kernel-headers-$(uname -r) kernel-devel-$(uname -r)
         RUN yum install -y "@Development Tools" rpm-build
-        RUN rpmbuild -tc *.tar.gz
-        RUN find /root/rpmbuild/BUILD/ -name *.ko | xargs -I {} cp {} /usr/src/
+        RUN rpmbuild -tb $(find . -name *.tar.gz)
+        RUN find /root/rpmbuild/RPMS/ -name *.rpm | xargs -I {} cp {} /usr/src/intel-driver/
         
         FROM registry.access.redhat.com/ubi8
-        COPY --from=builder /usr/src/*.ko /usr/src/
-        RUN mkdir -p /opt/lib/modules/$(uname -r)/
-        RUN rm -Rf /etc/rhsm-host
-        RUN cp /usr/src/*.ko /opt/lib/modules/$(uname -r)/
-        RUN yum install -y kmod
-        RUN yum clean all
-        RUN depmod -b /opt $(uname -r)
+        COPY --from=builder /usr/src/intel-driver/*.rpm /usr/src/
   strategy:
     type: Docker
     dockerStrategy:
