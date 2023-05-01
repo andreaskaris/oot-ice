@@ -7,6 +7,16 @@ RELEASE_VER="8.6"
 
 DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 OUTPUT_DIR="${DIR}/_output"
+
+deps="jinja2"
+for dep in ${deps}; do
+    if ! command -v "${dep}" &> /dev/null
+    then
+        echo "Missing dependency ${dep}"
+        exit 1
+    fi
+done
+
 mkdir -p "${OUTPUT_DIR}"
 
 if [ "$(oc get secret etc-pki-entitlement -o name | wc -l)" -eq 0 ]; then
