@@ -1,0 +1,41 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: ice
+spec:
+  source:
+    dockerfile: |
+        FROM ubi8 as builder
+        WORKDIR /usr/src
+        RUN curl -L -O "{{DRIVER_URL}}"
+        RUN rm -Rf /etc/rhsm-host
+        RUN yum install -y --enablerepo=rhel-8-for-x86_64-baseos-eus-rpms --releasever={{RELEASE_VER}} kernel-headers-$(uname -r) kernel-devel-$(uname -r)
+        RUN yum install -y "@Development Tools" rpm-build
+        RUN rpmbuild -tc *.tar.gz
+        RUN find /root/rpmbuild/BUILD/ -name *.ko | xargs -I {} cp {} /usr/src/
+        
+        FROM registry.access.redhat.com/ubi8
+        COPY --from=builder /usr/src/*.ko /usr/src/
+        RUN mkdir -p /opt/lib/modules/$(uname -r)/
+        RUN rm -Rf /etc/rhsm-host
+        RUN cp /usr/src/*.ko /opt/lib/modules/$(uname -r)/
+        RUN yum install -y kmod
+        RUN yum clean all
+        RUN depmod -b /opt $(uname -r)
+  strategy:
+    type: Docker
+    dockerStrategy:
+      volumes:
+      - name: etc-pki-entitlement
+        mounts:
+        - destinationPath: /etc/pki/entitlement
+        source:
+          type: Secret
+          secret:
+            secretName: etc-pki-entitlement
+  triggers:
+    - type: "ConfigChange"
+  output:
+    to:
+      kind: ImageStreamTag
+      name: ice:latest
