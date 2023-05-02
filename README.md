@@ -1,3 +1,7 @@
+# Disclaimer
+
+The below steps are experimental and not to be used in a production environment.
+
 # Instructions
 
 #### Step 1):
@@ -8,12 +12,6 @@ internal registry to managed:
 ~~~
 
 #### Step 2):
-Install the kernel-module-management operator:
-~~~
-./install-kernel-module-management.sh
-~~~
-
-#### Step 3):
 Create a new project:
 ~~~
 oc new-project build-driver
@@ -35,16 +33,23 @@ privileged ()
 privileged build-driver
 ~~~
 
-#### Step 4):
+#### Step 3):
 Build the kernel module image:
 ~~~
 ./build-kernel-module.sh
 ~~~
 > Edit the URL and release version as needed, e.g. OCP 4.12 is based on release version 8.6
 
+#### Step 4):
+Load the image to all nodes:
+~~~
+oc apply -f daemonset.yaml
+~~~
+> **Note:** This is a workaround as podman pull does not have the credentials to directly pull from the internal registry.
+
 #### Step 5):
-Load the kernel module:
+Deploy the MachineConfig that will load the kernel module on system boot:
 ~~~
-oc apply -f load-module.yaml
+oc apply -f machine-config.yaml
 ~~~
-> Make changes to this file as needed. For example the IS stream location.
+> Customize this as needed, the default file contains both master and worker machine configurations.

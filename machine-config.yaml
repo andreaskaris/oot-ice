@@ -1,0 +1,57 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 10-master-load-ice-oot
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    systemd:
+      units:
+      - contents: |
+          [Unit]
+          Description=Load the ICE OOT driver
+          Before=kubelet.service
+
+          [Service]
+          Type=oneshot
+          TimeoutStartSec=30m
+          RemainAfterExit=true
+          ExecStart=/usr/bin/bash -c "podman run --privileged image-registry.openshift-image-registry.svc:5000/build-driver/ice entrypoint.sh"
+          StandardOutput=journal+console
+
+          [Install]
+          WantedBy=default.target
+        enabled: true
+        name: load-ice-oot.service
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 10-worker-load-ice-oot
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    systemd:
+      units:
+      - contents: |
+          [Unit]
+          Description=Load the ICE OOT driver
+          Before=kubelet.service
+
+          [Service]
+          Type=oneshot
+          TimeoutStartSec=30m
+          RemainAfterExit=true
+          ExecStart=/usr/bin/bash -c "podman run --privileged image-registry.openshift-image-registry.svc:5000/build-driver/ice entrypoint.sh"
+          StandardOutput=journal+console
+
+          [Install]
+          WantedBy=default.target
+        enabled: true
+        name: load-ice-oot.service

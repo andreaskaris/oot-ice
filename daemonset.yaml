@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: pull-ice-image
+spec:
+  selector:
+    matchLabels:
+      name: pull-ice-image
+  template:
+    metadata:
+      labels:
+        name: pull-ice-image
+    spec:
+      tolerations:
+      - operator: Exists
+      containers:
+      - name: pull-ice-image
+        image: image-registry.openshift-image-registry.svc:5000/build-driver/ice:latest
+        command:
+        - sleep
+        - infinity
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: 50Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi

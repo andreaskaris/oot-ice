@@ -9,7 +9,7 @@ spec:
         WORKDIR /usr/src
         RUN curl -L -O "{{DRIVER_URL}}"
         RUN rm -Rf /etc/rhsm-host
-        RUN yum install -y --enablerepo=rhel-8-for-x86_64-baseos-eus-rpms --releasever={{RELEASE_VER}} kernel-headers-$(uname -r) kernel-devel-$(uname -r)
+        RUN yum install -y --enablerepo=rhel-8-for-x86_64-baseos-eus-rpms --releasever=$(uname -r | awk -F '.' '{print $(NF-1)}' | sed 's/^el//' | sed 's/_/./') kernel-headers-$(uname -r) kernel-devel-$(uname -r)
         RUN yum install -y "@Development Tools" rpm-build
         RUN rpmbuild -tc *.tar.gz
         RUN find /root/rpmbuild/BUILD/ -name *.ko | xargs -I {} cp {} /usr/src/
@@ -22,6 +22,7 @@ spec:
         RUN yum install -y kmod
         RUN yum clean all
         RUN depmod -b /opt $(uname -r)
+        RUN echo -e "#!/bin/bash\nset -eux\nrmmod irdma || true\nrmmod ice || true\nmodprobe -v -d /opt ice" > /usr/local/bin/entrypoint.sh; chmod +x /usr/local/bin/entrypoint.sh
   strategy:
     type: Docker
     dockerStrategy:
