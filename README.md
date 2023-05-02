@@ -1,6 +1,13 @@
 # Disclaimer
 
-The below steps are experimental and not to be used in a production environment.
+The below steps are experimental and not to be used in a production environment. Make sure that you can log into your
+nodes with a password before applying this.
+
+Current shortcomings:
+* upgrades will likely break the compiled ICE driver
+* if the DaemonSet is stopped and its images are pruned, then the module loader will fail
+* irdma module removed and not reloaded (this might have to be built from upstream, too)
+* firmware and ICE DDPs are not addressed
 
 # Instructions
 
@@ -44,6 +51,7 @@ Build the kernel module image:
 Load the image to all nodes:
 ~~~
 oc apply -f daemonset.yaml
+oc rollout status -f daemonset.yaml
 ~~~
 > **Note:** This is a workaround as podman pull does not have the credentials to directly pull from the internal registry.
 
