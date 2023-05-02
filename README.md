@@ -38,7 +38,7 @@ Build the kernel module image:
 ~~~
 ./build-kernel-module.sh
 ~~~
-> Edit the URL and release version as needed, e.g. OCP 4.12 is based on release version 8.6
+> Edit the URL as needed.
 
 #### Step 4):
 Load the image to all nodes:
